@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<mapper namespace="com.hebeu.springboot.Mapper.UserMapper">
+
+    <sql id="test">
+        SELECT `password`
+        ,
+        user
+        ,
+        detail
+        ,id
+        FROM
+        USER,
+        detail
+        WHERE
+        user="李可欣"
+        AND USER = user_id
+    </sql>
+
+
+    <sql id="find">
+        SELECT
+        *
+        FROM
+        detail
+        WHERE
+        user_id = "李可欣"
+    </sql>
+
+    <resultMap type="Detail" id="userdetail">
+        <id column="user" property="user_id"/>
+        <result column="detail"  property="detail"/>
+        <result column="id"  property="id"/>
+        <collection property="user"  ofType="User">
+            <id column="user" property="user"/>
+            <result column="password"  property="password"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="Detail" id="test">
+        <id column="user_id" property="user_id"/>
+        <result column="detail"  property="detail"/>
+        <result column="id"  property="id"/>
+        <association property="user"  javaType="User" select="find"  column="user_id">
+        </association>
+    </resultMap>
+
+    <!-- 登录 -->
+    <select id="findbyuserandpassword" parameterType="User" resultType="User">
+        select * from user where user=#{user} and password=#{password}
+    </select>
+
+    <!-- 注册 -->
+    <insert id="insertUser" parameterType="User" >
+        insert into user(user,password,sex,age,email,hobby,time) value(#{user},#{password},#{sex},#{age},#{email},#{hobby},#{time})
+    </insert>
+
+    <!-- 检查 -->
+    <select id="check"  parameterType="String" resultType="User">
+        select * from user where user=#{user}
+    </select>
+
+    <!-- 全部查询 -->
+    <select id="findAll" resultType="User">
+        <!-- <include refid="test"></include> -->
+        select * from user
+    </select>
+
+    <!-- 条件查询 -->
+    <select id="findByMul"  parameterType="UserfindByMul"  resultType="User">
+        select * from user
+        <where>
+            <if test="user!=''">
+                and user like concat('%',#{user},'%')<!-- concat连接函数 -->
+            </if>
+            <if test='!sex.equals("0")'>
+                and sex=#{sex}
+            </if>
+            <if test="minage!=''">
+                and age &gt;=#{minage}
+            </if>
+            <if test="maxage!=''">
+                and	age &lt;=#{maxage}
+            </if>
+            <if test="email!=''">
+                and email=#{email}
+            </if>
+        </where>
+
+    </select>
+
+    <!-- 删除 -->
+    <delete id="deleteUser" parameterType="String" >
+        delete from user where user=#{user}
+    </delete>
+
+    <!-- 更新 -->
+    <update id="updateUser"  parameterType="User">
+        update user set password={password},sex=#{sex},age=#{age},email=#{email},hobby=#{hobby},time=#{time} where user=#{user}
+    </update>
+
+    <update id="creat">
+        CREATE TABLE `class1`  (
+        `class_id` int(0) NOT NULL AUTO_INCREMENT,
+        `class_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+        `class_creattime` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0),
+        PRIMARY KEY (`class_id`) USING BTREE
+        ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;</update>
+
+    <select id="find"  parameterType="String"    resultType="User">
+        select * from user where  user =#{value}
+    </select>
+
+    <select id="finddetailbyuser" resultMap="test">
+        <include refid="find"></include>
+    </select>
+</mapper>
